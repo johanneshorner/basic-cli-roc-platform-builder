@@ -96,6 +96,45 @@ fn cmd_exec_output(
 }
 
 #[host_fn_try]
+fn dir_create(ops: &roc::RocOps, path: &RocStr) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::create_dir(path.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn dir_create_all(ops: &roc::RocOps, path: &RocStr) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::create_dir_all(path.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn dir_delete_empty(ops: &roc::RocOps, path: &RocStr) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::remove_dir(path.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn dir_delete_all(ops: &roc::RocOps, path: &RocStr) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::remove_dir_all(path.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn dir_list(
+    ops: &roc::RocOps,
+    path: &RocStr,
+) -> Result<RocList<RocStr>, RocSingleTagWrapper<IOErr>> {
+    std::fs::read_dir(path.as_str())
+        .map(|read_dir| {
+            let entries: Vec<_> = read_dir
+                .filter_map(|entry| {
+                    entry
+                        .ok()
+                        .map(|e| RocStr::from_str(&e.path().to_string_lossy(), ops))
+                })
+                .collect();
+            RocList::from_slice(&entries, ops)
+        })
+        .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
 fn file_read_to_end(
     ops: &roc::RocOps,
     path: &RocStr,
