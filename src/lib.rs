@@ -1,9 +1,11 @@
 use std::{
     io::{Read, stdin},
+    mem::ManuallyDrop,
     ops::Deref,
     process::ExitCode,
 };
 
+use roc_command::CommandOutputSuccess;
 use roc_io_error::IOErr;
 use roc_platform_builder::{
     RocArc, RocHost, RocSingleTagWrapper, RocUserData, host_fn, host_fn_try, platform_init,
@@ -14,8 +16,83 @@ use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 use roc_platform_builder::roc_std_new::{self as roc, RocList};
 
 use roc::RocStr;
+
 struct Host {
     s: String,
+}
+
+#[host_fn_try]
+fn cmd_exec_exit_code(
+    ops: &roc::RocOps,
+    cmd: &roc_command::Command,
+) -> Result<i32, RocSingleTagWrapper<IOErr>> {
+    roc_command::command_exec_exit_code(cmd, ops).map_err(|e| e.into())
+}
+
+#[repr(C)]
+pub struct NonZeroExitPayload {
+    pub stderr_utf8_lossy: RocStr, // offset 0 (24 bytes)
+    pub stdout_utf8_lossy: RocStr, // offset 24 (24 bytes)
+    pub exit_code: i32,            // offset 48 (4 bytes + padding)
+}
+
+#[repr(C)]
+pub union CmdOutputErrPayload {
+    cmd_err: ManuallyDrop<roc_io_error::IOErr>,
+    non_zero_exit: ManuallyDrop<NonZeroExitPayload>,
+}
+
+#[repr(C)]
+pub struct CmdOutputErr {
+    payload: CmdOutputErrPayload,
+    discriminant: u8, // CmdErr=0, NonZeroExit=1
+}
+
+impl CmdOutputErr {
+    pub fn cmd_err(io_err: roc_io_error::IOErr) -> Self {
+        Self {
+            payload: CmdOutputErrPayload {
+                cmd_err: core::mem::ManuallyDrop::new(io_err),
+            },
+            discriminant: 0,
+        }
+    }
+
+    pub fn non_zero_exit(
+        stderr_utf8_lossy: RocStr,
+        stdout_utf8_lossy: RocStr,
+        exit_code: i32,
+    ) -> Self {
+        Self {
+            payload: CmdOutputErrPayload {
+                non_zero_exit: core::mem::ManuallyDrop::new(NonZeroExitPayload {
+                    stderr_utf8_lossy,
+                    stdout_utf8_lossy,
+                    exit_code,
+                }),
+            },
+            discriminant: 1,
+        }
+    }
+}
+
+#[host_fn_try]
+fn cmd_exec_output(
+    ops: &roc::RocOps,
+    cmd: &roc_command::Command,
+) -> Result<CommandOutputSuccess, CmdOutputErr> {
+    match roc_command::command_exec_output(cmd, ops) {
+        roc_command::CommandOutputResult::Success(output) => Ok(CommandOutputSuccess {
+            stderr_utf8_lossy: output.stderr_utf8_lossy,
+            stdout_utf8: output.stdout_utf8,
+        }),
+        roc_command::CommandOutputResult::NonZeroExit(failure) => Err(CmdOutputErr::non_zero_exit(
+            failure.stderr_utf8_lossy,
+            failure.stdout_utf8_lossy,
+            failure.exit_code,
+        )),
+        roc_command::CommandOutputResult::Error(io_err) => Err(CmdOutputErr::cmd_err(io_err)),
+    }
 }
 
 #[host_fn_try]

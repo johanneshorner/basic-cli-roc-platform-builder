@@ -16,6 +16,7 @@ name = "basic-cli"
 version = "0.1.0"
 dependencies = [
  "roc-platform-builder",
+ "roc_command",
  "roc_io_error",
  "tracing",
  "tracing-subscriber",
@@ -168,6 +169,14 @@ dependencies = [
  "quote",
  "roc_std_new",
  "syn",
+]
+
+[[package]]
+name = "roc_command"
+version = "0.0.1"
+dependencies = [
+ "roc_io_error",
+ "roc_std_new",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 platform ""
     requires {} { main! : List(Str) => Try({}, [Exit(U8), ..]) }
-    exposes [Stdout, Stdin, Stderr, File]
+    exposes [Cmd, Stdout, Stdin, Stderr, File]
     packages {}
     provides { main_for_host! : "main_for_host" }
     targets: {

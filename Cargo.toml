@@ -13,3 +13,4 @@ roc-platform-builder.path = "../roc-platform-builder/crates/roc-platform-builder
 tracing = "0.1.43"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 roc_io_error.path = "../basic-cli/crates/roc_io_error"
+roc_command.path = "../basic-cli/crates/roc_command"
