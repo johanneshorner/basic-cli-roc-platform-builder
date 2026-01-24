@@ -231,6 +231,11 @@ fn random_seed_u32(ops: &roc::RocOps) -> Result<u32, RocSingleTagWrapper<IOErr>>
     Ok(roc_random::random_u32(ops)?)
 }
 
+#[host_fn]
+fn sleep_millis(_ops: &roc::RocOps, millis: &u64) {
+    std::thread::sleep(std::time::Duration::from_millis(*millis));
+}
+
 #[host_fn_try]
 fn stdin_line(ops: &roc::RocOps) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
     let mut buf = String::with_capacity(1024);

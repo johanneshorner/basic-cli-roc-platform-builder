@@ -2,7 +2,7 @@ platform ""
 	requires {
 		main! : List(Str) => Try({}, [Exit(U8), ..])
 	}
-	exposes [Cmd, Dir, Env, File, Path, Random, Stdout, Stdin, Stderr]
+	exposes [Cmd, Dir, Env, File, Path, Random, Sleep, Stdout, Stdin, Stderr]
 	packages {}
 	provides { main_for_host!: "main_for_host" }
 	targets: {
