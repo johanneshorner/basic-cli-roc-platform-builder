@@ -1,15 +1,12 @@
 use std::{
     io::{Read, stdin},
     mem::ManuallyDrop,
-    ops::Deref,
     process::ExitCode,
 };
 
 use roc_command::CommandOutputSuccess;
 use roc_io_error::IOErr;
-use roc_platform_builder::{
-    RocArc, RocHost, RocSingleTagWrapper, RocUserData, host_fn, host_fn_try, platform_init,
-};
+use roc_platform_builder::{RocHost, RocSingleTagWrapper, host_fn, host_fn_try, platform_init};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
@@ -282,6 +279,14 @@ fn tty_enable_raw_mode(ops: &roc::RocOps) -> Result<(), RocSingleTagWrapper<IOEr
 #[host_fn_try]
 fn tty_disable_raw_mode(ops: &roc::RocOps) -> Result<(), RocSingleTagWrapper<IOErr>> {
     crossterm::terminal::disable_raw_mode().map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn]
+fn utc_now(_ops: &roc::RocOps) -> u128 {
+    let since_epoch = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("time went backwards");
+    since_epoch.as_nanos()
 }
 
 fn init(args: &[String]) -> ExitCode {
