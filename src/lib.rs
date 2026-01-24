@@ -236,6 +236,16 @@ fn sleep_millis(_ops: &roc::RocOps, millis: &u64) {
     std::thread::sleep(std::time::Duration::from_millis(*millis));
 }
 
+#[host_fn]
+fn stderr_line(_ops: &roc::RocOps, message: &RocStr) {
+    eprintln!("{}", message.as_str());
+}
+
+#[host_fn]
+fn stderr_write(_ops: &roc::RocOps, message: &RocStr) {
+    eprint!("{}", message.as_str());
+}
+
 #[host_fn_try]
 fn stdin_line(ops: &roc::RocOps) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
     let mut buf = String::with_capacity(1024);
@@ -269,11 +279,6 @@ type SomeType = RocArc<String>;
 #[host_fn]
 fn stdout_print_it(_ops: &roc::RocOps, some_type: &SomeType) {
     eprintln!("print_it: {}", some_type.deref())
-}
-
-#[host_fn]
-fn stderr_line(_ops: &roc::RocOps, message: &RocStr) {
-    eprintln!("{}", message.as_str());
 }
 
 fn init(args: &[String]) -> ExitCode {
