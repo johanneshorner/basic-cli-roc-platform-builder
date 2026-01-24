@@ -198,6 +198,30 @@ fn file_delete(ops: &roc::RocOps, path: &RocStr) -> Result<(), RocSingleTagWrapp
 }
 
 #[host_fn_try]
+fn path_is_file(ops: &roc::RocOps, path: &RocStr) -> Result<bool, RocSingleTagWrapper<IOErr>> {
+    std::path::Path::new(path.as_str())
+        .symlink_metadata()
+        .map(|m| m.is_file())
+        .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn path_is_dir(ops: &roc::RocOps, path: &RocStr) -> Result<bool, RocSingleTagWrapper<IOErr>> {
+    std::path::Path::new(path.as_str())
+        .symlink_metadata()
+        .map(|m| m.is_dir())
+        .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn path_is_sym_link(ops: &roc::RocOps, path: &RocStr) -> Result<bool, RocSingleTagWrapper<IOErr>> {
+    std::path::Path::new(path.as_str())
+        .symlink_metadata()
+        .map(|m| m.is_symlink())
+        .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
 fn stdin_line(ops: &roc::RocOps) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
     let mut buf = String::with_capacity(1024);
     stdin()
