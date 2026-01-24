@@ -265,20 +265,13 @@ fn stdin_read_to_end(ops: &roc::RocOps) -> Result<RocList<u8>, RocSingleTagWrapp
 }
 
 #[host_fn]
-fn stdout_get_some_type(_ops: &roc::RocOps) -> SomeType {
-    SomeType::new("hi".into())
+fn stdout_line(_ops: &roc::RocOps, message: &RocStr) {
+    println!("{}", message.as_str());
 }
 
 #[host_fn]
-fn stdout_line(ops: &roc::RocOps, message: &RocStr) {
-    println!("{} {}", message.as_str(), ops.user_data::<Host>().s);
-}
-
-type SomeType = RocArc<String>;
-
-#[host_fn]
-fn stdout_print_it(_ops: &roc::RocOps, some_type: &SomeType) {
-    eprintln!("print_it: {}", some_type.deref())
+fn stdout_write(_ops: &roc::RocOps, message: &RocStr) {
+    print!("{}", message.as_str());
 }
 
 fn init(args: &[String]) -> ExitCode {
