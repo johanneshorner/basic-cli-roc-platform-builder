@@ -1,8 +1,8 @@
 SomeType := [].{
-    print_it! : SomeType => {}
+	print_it! : SomeType => {}
 }
 
 Stdout := [].{
-    line! : Str => {}
-    get_some_type! : () => SomeType
+	line! : Str => {}
+	get_some_type! : () => SomeType
 }
