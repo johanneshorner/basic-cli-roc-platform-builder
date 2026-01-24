@@ -251,11 +251,11 @@ fn stdin_line(ops: &roc::RocOps) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
     let mut buf = String::with_capacity(1024);
     stdin()
         .read_line(&mut buf)
-        .map(|_| RocStr::from_str(buf.as_str(), ops))
+        .map(|_| RocStr::from_str(buf.as_str().trim_end_matches('\n'), ops))
         .map_err(|e| IOErr::from_io_error(&e, ops).into())
 }
 
-#[host_fn]
+#[host_fn_try]
 fn stdin_read_to_end(ops: &roc::RocOps) -> Result<RocList<u8>, RocSingleTagWrapper<IOErr>> {
     let mut buf = Vec::with_capacity(1024);
     stdin()
