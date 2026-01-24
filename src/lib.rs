@@ -157,14 +157,44 @@ fn env_exe_path(ops: &roc::RocOps) -> RocStr {
 }
 
 #[host_fn_try]
-fn file_read_to_end(
+fn file_read_bytes(
     ops: &roc::RocOps,
     path: &RocStr,
-) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
-    let file_path = path.as_str();
-    std::fs::read_to_string(file_path)
+) -> Result<RocList<u8>, RocSingleTagWrapper<IOErr>> {
+    std::fs::read(path.as_str())
+        .map(|s| RocList::from_slice(&s, ops))
+        .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn file_write_bytes(
+    ops: &roc::RocOps,
+    path: &RocStr,
+    bytes: &RocList<u8>,
+) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::write(path.as_str(), bytes.as_slice())
+        .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn file_read_utf8(ops: &roc::RocOps, path: &RocStr) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
+    std::fs::read_to_string(path.as_str())
         .map(|s| RocStr::from_str(s.as_str(), ops))
         .map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn file_write_utf8(
+    ops: &roc::RocOps,
+    path: &RocStr,
+    s: &RocStr,
+) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::write(path.as_str(), s.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn file_delete(ops: &roc::RocOps, path: &RocStr) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    std::fs::remove_file(path.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
 }
 
 #[host_fn_try]
