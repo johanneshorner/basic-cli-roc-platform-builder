@@ -274,6 +274,16 @@ fn stdout_write(_ops: &roc::RocOps, message: &RocStr) {
     print!("{}", message.as_str());
 }
 
+#[host_fn_try]
+fn tty_enable_raw_mode(ops: &roc::RocOps) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    crossterm::terminal::enable_raw_mode().map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
+#[host_fn_try]
+fn tty_disable_raw_mode(ops: &roc::RocOps) -> Result<(), RocSingleTagWrapper<IOErr>> {
+    crossterm::terminal::disable_raw_mode().map_err(|e| IOErr::from_io_error(&e, ops).into())
+}
+
 fn init(args: &[String]) -> ExitCode {
     tracing_subscriber::registry()
         .with(fmt::layer())
