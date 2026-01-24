@@ -134,6 +134,28 @@ fn dir_list(
         .map_err(|e| IOErr::from_io_error(&e, ops).into())
 }
 
+#[host_fn]
+fn env_var(ops: &roc::RocOps, name: &RocStr) -> RocStr {
+    let value = std::env::var(name.as_str()).unwrap_or_default();
+    RocStr::from_str(&value, ops)
+}
+
+#[host_fn]
+fn env_cwd(ops: &roc::RocOps) -> RocStr {
+    let cwd = std::env::current_dir()
+        .map(|p| p.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    RocStr::from_str(&cwd, ops)
+}
+
+#[host_fn]
+fn env_exe_path(ops: &roc::RocOps) -> RocStr {
+    let exe_path = std::env::current_exe()
+        .map(|p| p.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    RocStr::from_str(&exe_path, ops)
+}
+
 #[host_fn_try]
 fn file_read_to_end(
     ops: &roc::RocOps,
