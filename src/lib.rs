@@ -222,6 +222,16 @@ fn path_is_sym_link(ops: &roc::RocOps, path: &RocStr) -> Result<bool, RocSingleT
 }
 
 #[host_fn_try]
+fn random_seed_u64(ops: &roc::RocOps) -> Result<u64, RocSingleTagWrapper<IOErr>> {
+    Ok(roc_random::random_u64(ops)?)
+}
+
+#[host_fn_try]
+fn random_seed_u32(ops: &roc::RocOps) -> Result<u32, RocSingleTagWrapper<IOErr>> {
+    Ok(roc_random::random_u32(ops)?)
+}
+
+#[host_fn_try]
 fn stdin_line(ops: &roc::RocOps) -> Result<RocStr, RocSingleTagWrapper<IOErr>> {
     let mut buf = String::with_capacity(1024);
     stdin()
