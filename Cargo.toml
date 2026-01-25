@@ -16,3 +16,4 @@ roc_io_error.path = "../basic-cli/crates/roc_io_error"
 roc_command.path = "../basic-cli/crates/roc_command"
 roc_random.path = "../basic-cli/crates/roc_random"
 crossterm = "0.29.0"
+reqwest = { version = "0.13.1", features = ["blocking"] }

@@ -4,6 +4,7 @@ use std::{
     process::ExitCode,
 };
 
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use roc_command::CommandOutputSuccess;
 use roc_io_error::IOErr;
 use roc_platform_builder::{RocHost, RocSingleTagWrapper, host, platform_init};
@@ -13,6 +14,10 @@ use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 use roc_platform_builder::roc_std_new::{self as roc, RocList};
 
 use roc::RocStr;
+
+use crate::http::Response;
+
+mod http;
 
 #[repr(C)]
 pub struct NonZeroExitPayload {
@@ -221,6 +226,49 @@ impl Host {
         path: &RocStr,
     ) -> Result<(), RocSingleTagWrapper<IOErr>> {
         std::fs::remove_file(path.as_str()).map_err(|e| IOErr::from_io_error(&e, ops).into())
+    }
+
+    #[fallible]
+    fn http_send(
+        &mut self,
+        ops: &roc::RocOps,
+        request: &http::Request,
+    ) -> Result<http::Response, RocSingleTagWrapper<http::RequestErr>> {
+        let request_builder = reqwest::blocking::Client::builder()
+            .build()
+            .map_err(|e| RocSingleTagWrapper::new(e.into()))?
+            .request(
+                match request.method.tag {
+                    http::MethodTag::Options => reqwest::Method::OPTIONS,
+                    http::MethodTag::Get => reqwest::Method::GET,
+                    http::MethodTag::Post => reqwest::Method::POST,
+                    http::MethodTag::Put => reqwest::Method::PUT,
+                    http::MethodTag::Delete => reqwest::Method::DELETE,
+                    http::MethodTag::Head => reqwest::Method::HEAD,
+                    http::MethodTag::Trace => reqwest::Method::TRACE,
+                    http::MethodTag::Connect => reqwest::Method::CONNECT,
+                    http::MethodTag::Patch => reqwest::Method::PATCH,
+                    http::MethodTag::Extension => reqwest::Method::from_bytes(
+                        request.method.extension().expect("is extension").as_bytes(),
+                    )
+                    .map_err(|_| http::RequestErr::invalid_method())?,
+                },
+                request.uri.as_str(),
+            )
+            .body(request.body.as_slice().to_vec());
+
+        let headers = request
+            .headers
+            .iter()
+            .map(|header| header.try_into())
+            .collect::<Result<Vec<(HeaderName, HeaderValue)>, _>>()?;
+
+        let response = request_builder
+            .headers(HeaderMap::from_iter(headers.into_iter()))
+            .send()
+            .map_err(|e| RocSingleTagWrapper::new(e.into()))?;
+
+        Ok(Response::from_reqwest_response(response, ops))
     }
 
     #[fallible]
