@@ -2,13 +2,28 @@ platform ""
 	requires {
 		main! : List(Str) => Try({}, [Exit(U8), ..])
 	}
-	exposes [Cmd, Dir, Env, File, Http, Path, Random, Sleep, Stderr, Stdin, Stdout, Tty, Utc]
+	exposes [
+		Cmd,
+		Dir,
+		Env,
+		File,
+		Http,
+		Path,
+		Random,
+		Sleep,
+		Stderr,
+		Stdin,
+		Stdout,
+		Tty,
+		Utc,
+	]
 	packages {}
 	provides { main_for_host!: "main_for_host" }
 	targets: {
 		files: "targets/",
 		exe: {
 			x64musl: ["crt1.o", "libhost.a", app, "libc.a"],
+			x64glibc: ["Scrt1.o", "crti.o", "libhost.a", app, "libc.so", "crtn.o", "libgcc_s.so.1"],
 		},
 	}
 
