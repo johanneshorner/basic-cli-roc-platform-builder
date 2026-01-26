@@ -16,6 +16,7 @@
       perSystem =
         {
           pkgs,
+          system,
           ...
         }:
         let
@@ -29,6 +30,13 @@
               ln -s "$bin" "$out/bin/musl-$(basename "$bin")"
             done
           '';
+          crossPkgs = import inputs.nixpkgs {
+            inherit system;
+            crossSystem = {
+              config = "x86_64-unknown-linux-musl";
+              isStatic = true;
+            };
+          };
         in
         {
           devShells.default = pkgs.mkShell {
@@ -36,6 +44,13 @@
               just
               musl-gcc
             ];
+            shellHook = ''
+              export CC_x86_64_unknown_linux_musl="${crossPkgs.stdenv.cc}/bin/x86_64-unknown-linux-musl-cc"
+              export CXX_x86_64_unknown_linux_musl="${crossPkgs.stdenv.cc}/bin/x86_64-unknown-linux-musl-c++"
+              export AR_x86_64_unknown_linux_musl="${crossPkgs.stdenv.cc}/bin/x86_64-unknown-linux-musl-ar"
+              export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER="${crossPkgs.stdenv.cc}/bin/x86_64-unknown-linux-musl-cc"
+              export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C target-feature=+crt-static"
+            '';
           };
         };
     };
