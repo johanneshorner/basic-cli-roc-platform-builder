@@ -255,10 +255,10 @@ impl RocRefcounted for Header {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Request {
-    pub method: Method,
-    pub headers: RocList<Header>,
-    pub uri: RocStr,
     pub body: RocList<u8>,
+    pub headers: RocList<Header>,
+    pub method: Method,
+    pub uri: RocStr,
 }
 
 impl RocRefcounted for Request {
@@ -282,9 +282,9 @@ impl RocRefcounted for Request {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Response {
-    status: u16,
-    headers: RocList<Header>,
     body: RocList<u8>,
+    headers: RocList<Header>,
+    status: u16,
 }
 
 impl Response {
