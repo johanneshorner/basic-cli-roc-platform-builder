@@ -9,11 +9,14 @@ name = "host"
 crate-type = ["staticlib"]
 
 [dependencies]
-roc-platform-builder.path = "../roc-platform-builder/crates/roc-platform-builder"
+roc-platform-builder.git = "https://github.com/johanneshorner/roc-platform-builder"
 tracing = "0.1.43"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
-roc_io_error.path = "../basic-cli/crates/roc_io_error"
-roc_command.path = "../basic-cli/crates/roc_command"
-roc_random.path = "../basic-cli/crates/roc_random"
+roc_io_error = { git = "https://github.com/roc-lang/basic-cli", rev = "a2e01910f5fac513dd04721dab3a895726643d6c" }
+roc_command = { git = "https://github.com/roc-lang/basic-cli", rev = "a2e01910f5fac513dd04721dab3a895726643d6c" }
+roc_random = { git = "https://github.com/roc-lang/basic-cli", rev = "a2e01910f5fac513dd04721dab3a895726643d6c" }
 crossterm = "0.29.0"
 reqwest = { version = "0.13.1", features = ["blocking"] }
+
+[patch."https://github.com/roc-lang/roc"]
+roc_std_new = { git = "https://github.com/roc-lang/roc?rev=a3f1c8689833432cc68327d2caf7b2ea80192142" }
