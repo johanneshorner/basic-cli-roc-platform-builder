@@ -27,6 +27,20 @@ platform ""
 		},
 	}
 
+import Cmd
+import Dir
+import Env
+import File
+import Http
+import Path
+import Random
+import Sleep
+import Stderr
+import Stdin
+import Stdout
+import Tty
+import Utc
+
 main_for_host! : List(Str) => U8
 main_for_host! = |args| {
 	result = main!(args)

@@ -33,8 +33,8 @@ Tty := [].{
 	## - Input will not be echoed to the terminal screen.
 	## - Input will be sent straight to the program instead of being buffered (= collected) until the Enter key is pressed.
 	## - Special keys like Backspace and CTRL+C will not be processed by the terminal driver but will be passed to the program.
-	enable_raw_mode! : () => [TtyErr(IOerr)]
+	enable_raw_mode! : () => [TtyErr(IOErr)]
 
 	## Revert terminal to default behaviour
-	disable_raw_mode! : () => [TtyErr(IOerr)]
+	disable_raw_mode! : () => [TtyErr(IOErr)]
 }

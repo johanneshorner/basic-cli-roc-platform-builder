@@ -1,7 +1,6 @@
 app [main!] { pf: platform "../platform/main.roc" }
 
 import pf.File
-import pf.Stdout
 import pf.Stderr
 import pf.Stdin
 import pf.Cmd
@@ -13,7 +12,7 @@ main! = |args| {
 	file_path = match args {
 		[_, path] => path
 		_ => {
-			Stdout.line!("Give me a path to a text file")
+			Stderr.line!("Give me a path to a text file")
 			return Err(Exit(25))
 		}
 	}
@@ -23,13 +22,13 @@ main! = |args| {
 	Stderr.line!("`File`: write(args[1]) -> read -> content: ${content}")
 
 	stdin = Stdin.read_to_end!()->Str.from_utf8_lossy()
-	Stdout.line!("`Stdin`: read_to_end -> in: ${stdin}")
+	Stderr.line!("`Stdin`: read_to_end -> in: ${stdin}")
 
 	Cmd.new("ls").args(["-l", "-a"]).exec_cmd!().map_err(|e| Cmd(e))?
 	Stderr.line!("`Cmd`: ls -la -> output: ${Str.inspect(Dir.list!("/home/johannes"))}")
 
 	response = Http.send!({ method: Get, headers: [], uri: "https://google.com", body: [] }).map_err(|e| Get(e))?
-	Stdout.line!("`Http`: send -> body: ${Str.from_utf8_lossy(response.body)}")
+	Stderr.line!("`Http`: send -> body: ${Str.from_utf8_lossy(response.body)}")
 
 	Ok({})
 }
